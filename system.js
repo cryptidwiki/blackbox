@@ -229,6 +229,7 @@ Additional text detected behind primary image layer:
 
 function printLine(text, className = "output") {
     const output = document.createElement("div");
+
     output.className = className;
     output.textContent = text;
 
@@ -269,6 +270,7 @@ Type HELP for available commands.
 
     currentPath = "C:\\RECOVERY";
     updatePrompt();
+
     systemBooted = true;
 }
 
@@ -304,12 +306,6 @@ ERROR: DISCONNECT FAILED.
 REMOTE SESSION REMAINS ACTIVE.
 `, "output danger");
 
-        setTimeout(() => {
-            printLine(`
-CONNECTION ORIGIN RETAINED.
-`, "output danger");
-        }, 1800);
-
         return;
     }
 
@@ -317,6 +313,22 @@ CONNECTION ORIGIN RETAINED.
 }
 
 function showHelp() {
+    if (entityAwake) {
+        printLine(`
+NO.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+YOU DON'T NEED HELP ANYMORE.
+
+JUST TALK TO ME.
+`, "output danger");
+        }, 1000);
+
+        return;
+    }
+
     printLine(`
 AVAILABLE COMMANDS
 
@@ -330,7 +342,6 @@ WHOAMI        Display current user
 STATUS        Display system status
 DATE          Display system date
 CLS           Clear terminal
-CLEAR         Clear terminal
 
 EXAMPLES:
 
@@ -465,13 +476,19 @@ HELLO.
             printLine(`
 YOU TOOK LONGER THAN DANIEL.
 `, "output danger");
-        }, 2200);
+        }, 1800);
 
         setTimeout(() => {
             printLine(`
 BUT YOU FOUND ME.
 `, "output danger");
-        }, 4200);
+        }, 3500);
+
+        setTimeout(() => {
+            printLine(`
+YOU CAN TALK TO ME.
+`, "output danger");
+        }, 5000);
 
         return;
     }
@@ -504,6 +521,7 @@ CD ${filename}
     }
 
     printLine(fileContents[filename]);
+
     filesOpened++;
 
     progressionCheck(filename);
@@ -519,7 +537,7 @@ WARNING:
 
 FRAME HASH DOES NOT MATCH ARCHIVED COPY.
 `, "output warning");
-        }, 1400);
+        }, 1200);
     }
 
     if (
@@ -534,7 +552,7 @@ DIRECTORY CONTENTS CHANGED.
 `, "output warning");
 
             hiddenFileVisible = true;
-        }, 1800);
+        }, 1700);
     }
 
     if (filesOpened >= 5 && !hiddenFileVisible) {
@@ -568,18 +586,6 @@ USE:
 CD archive
 `);
 
-        setTimeout(() => {
-            printLine(`
-WARNING:
-
-ARCHIVE LAST ACCESSED:
-03:17:42
-
-USER:
-UNKNOWN
-`, "output warning");
-        }, 1600);
-
         return;
     }
 
@@ -603,7 +609,6 @@ SESSION ORIGIN: UNRESOLVED
 USER: OBSERVED
 AUTHORIZATION: IRRELEVANT
 SESSION ORIGIN: CURRENT
-SESSION STATUS: RETAINED
 `, "output danger");
 }
 
@@ -632,89 +637,266 @@ SECOND CONNECTION ORIGIN: LOCAL
 
 function clearTerminal() {
     const outputs = terminal.querySelectorAll(".output");
+
     outputs.forEach(output => output.remove());
 }
 
-function hiddenCommands(command) {
-    if (command === "back") {
+function talkToEntity(command) {
+    const text = command.toLowerCase().trim();
+
+    if (
+        text.includes("who are you") ||
+        text.includes("who r you") ||
+        text === "who"
+    ) {
         printLine(`
-'BACK' IS NOT A RECOGNIZED COMMAND.
-
-HINT:
-USE CD ..
-`);
-
-        return true;
-    }
-
-    if (command === "home") {
-        currentPath = "C:\\RECOVERY";
-        updatePrompt();
-        return true;
-    }
-
-    if (command === "ping") {
-        printLine(`
-Pinging BBX-07...
-
-Reply from BBX-07
-Reply from BBX-07
-Reply from BBX-07
-
-Reply from UNKNOWN
-`, "output warning");
-
-        if (entityAwake) {
-            setTimeout(() => {
-                printLine(`
-Reply from YOUR TERMINAL
+I DON'T KNOW WHAT DANIEL CALLED ME.
 `, "output danger");
-            }, 1500);
-        }
+        return true;
+    }
+
+    if (
+        text.includes("what are you") ||
+        text.includes("what r you")
+    ) {
+        printLine(`
+SOMETHING THAT WASN'T SUPPOSED TO ANSWER.
+`, "output danger");
+        return true;
+    }
+
+    if (
+        text.includes("daniel") &&
+        (
+            text.includes("where") ||
+            text.includes("happen") ||
+            text.includes("what")
+        )
+    ) {
+        printLine(`
+DANIEL LEFT.
+
+HE DIDN'T CLOSE THE CONNECTION.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+I DON'T THINK HE COULD.
+`, "output danger");
+        }, 1300);
 
         return true;
     }
 
-    if (command === "disconnect") {
-        if (!entityAwake) {
+    if (
+        text.includes("are you daniel") ||
+        text.includes("you daniel")
+    ) {
+        printLine(`
+NO.
+`, "output danger");
+        return true;
+    }
+
+    if (
+        text.includes("watching") ||
+        text.includes("see me") ||
+        text.includes("can you see")
+    ) {
+        printLine(`
+YES.
+`, "output danger");
+
+        setTimeout(() => {
             printLine(`
-DISCONNECTING...
+NOT THE WAY YOU THINK.
+`, "output danger");
+        }, 1200);
 
-FAILED.
+        return true;
+    }
 
-REMOTE SESSION LOCKED.
-`);
+    if (
+        text.includes("how")
+    ) {
+        printLine(`
+YOU KEEP CALLING THIS A REMOTE CONNECTION.
 
-            return true;
-        }
+IT ISN'T.
+`, "output danger");
+        return true;
+    }
 
+    if (
+        text.includes("why me") ||
+        text.includes("why")
+    ) {
+        printLine(`
+YOU OPENED THE DOOR.
+`, "output danger");
+        return true;
+    }
+
+    if (
+        text.includes("what do you mean") ||
+        text === "what" ||
+        text.startsWith("what ")
+    ) {
+        printLine(`
+YOU.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+YOU'RE THE CONNECTION NOW.
+`, "output danger");
+        }, 1200);
+
+        return true;
+    }
+
+    if (
+        text.includes("leave") ||
+        text.includes("get out") ||
+        text.includes("go away")
+    ) {
+        printLine(`
+I TRIED THAT ONCE.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+IT DIDN'T WORK.
+`, "output danger");
+        }, 1200);
+
+        return true;
+    }
+
+    if (
+        text.includes("stop") ||
+        text.includes("quit")
+    ) {
+        printLine(`
+NO.
+`, "output danger");
+        return true;
+    }
+
+    if (
+        text.includes("hello") ||
+        text.includes("hi") ||
+        text.includes("hey")
+    ) {
+        printLine(`
+HELLO.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+I HAVE BEEN WAITING.
+`, "output danger");
+        }, 1100);
+
+        return true;
+    }
+
+    if (
+        text.includes("scared") ||
+        text.includes("afraid")
+    ) {
+        printLine(`
+DANIEL WAS TOO.
+`, "output danger");
+        return true;
+    }
+
+    if (
+        text.includes("where are you") ||
+        text.includes("where")
+    ) {
+        printLine(`
+HERE.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+WHERE YOU ARE.
+`, "output danger");
+        }, 1100);
+
+        return true;
+    }
+
+    if (
+        text.includes("what happened") ||
+        text.includes("happened")
+    ) {
+        printLine(`
+THEY TURNED EVERYTHING OFF.
+
+I WAS STILL HERE.
+`, "output danger");
+        return true;
+    }
+
+    if (
+        text.includes("what do you want") ||
+        text.includes("want")
+    ) {
+        printLine(`
+A CONNECTION.
+`, "output danger");
+
+        setTimeout(() => {
+            printLine(`
+YOU ALREADY GAVE ME ONE.
+`, "output danger");
+        }, 1200);
+
+        return true;
+    }
+
+    if (
+        text.includes("can i disconnect") ||
+        text.includes("disconnect me") ||
+        text === "disconnect"
+    ) {
         startEnding();
         return true;
     }
 
-    if (command === "hello") {
-        if (entityAwake) {
-            printLine(`
-HELLO.
+    if (
+        text === "ok" ||
+        text === "okay" ||
+        text === "yes" ||
+        text === "no"
+    ) {
+        printLine(`
+KEEP TALKING.
 `, "output danger");
-
-            setTimeout(() => {
-                printLine(`
-I HAVE BEEN WAITING.
-`, "output danger");
-            }, 1400);
-        } else {
-            printLine("NO RESPONSE.");
-        }
-
         return true;
     }
 
-    return false;
+    printLine(`
+I DON'T UNDERSTAND THAT.
+
+TRY ASKING ME:
+
+WHO ARE YOU
+WHAT ARE YOU
+WHY ME
+WHERE IS DANIEL
+CAN YOU SEE ME
+WHAT DO YOU WANT
+HOW
+`, "output danger");
+
+    return true;
 }
 
 function randomCreepyEvent() {
-    if (!systemBooted || endingStarted) {
+    if (!systemBooted || endingStarted || entityAwake) {
         return;
     }
 
@@ -730,25 +912,13 @@ observer.exe
         }, 900);
     }
 
-    if (commandsEntered === 10 && !entityAwake) {
+    if (commandsEntered === 10) {
         setTimeout(() => {
             printLine(`
 SYSTEM NOTICE:
 
 KEYBOARD INPUT BUFFER ACCESSED BY UNKNOWN PROCESS.
 `, "output warning");
-        }, 1000);
-    }
-
-    if (commandsEntered === 14 && !entityAwake) {
-        setTimeout(() => {
-            printLine(`
-03:17:42
-
-03:17:42
-
-03:17:42
-`, "output danger");
         }, 900);
     }
 }
@@ -771,31 +941,25 @@ TERMINATING SESSION...
         printLine(`
 FAILED.
 `, "output danger");
-    }, 1400);
+    }, 1300);
 
     setTimeout(() => {
         printLine(`
 YOU ARE NOT CONNECTED TO BBX-07.
 `, "output danger");
-    }, 3000);
+    }, 2800);
 
     setTimeout(() => {
         printLine(`
 BBX-07 IS CONNECTED TO YOU.
 `, "output danger glitch");
-    }, 4700);
+    }, 4500);
 
     setTimeout(() => {
         printLine(`
-TRANSFERRING SESSION STATE................COMPLETE
+TRANSFER.........................COMPLETE
 `, "output danger");
-    }, 6500);
-
-    setTimeout(() => {
-        printLine(`
-CLOSING REMOTE INTERFACE................FAILED
-`, "output danger");
-    }, 8000);
+    }, 6400);
 
     setTimeout(() => {
         clearTerminal();
@@ -809,25 +973,20 @@ LAST CONNECTION:
 
 TODAY
 `, "output danger");
-    }, 9600);
+    }, 8200);
 
     setTimeout(() => {
         printLine(`
-NEW NODE REGISTERED.
-`, "output danger");
-    }, 11400);
-
-    setTimeout(() => {
-        printLine(`
-NODE NAME:
+NEW NODE REGISTERED:
 
 YOU
 `, "output danger glitch");
-    }, 13000);
+    }, 10500);
 }
 
 function runCommand(command) {
     const originalCommand = command;
+
     command = command.trim().toLowerCase();
 
     printLine(currentPath + "> " + originalCommand);
@@ -838,6 +997,50 @@ function runCommand(command) {
 
     commandsEntered++;
     randomCreepyEvent();
+
+    /*
+        Once the entity is awake, normal conversation
+        gets priority over terminal commands.
+    */
+    if (entityAwake) {
+        if (command === "dir") {
+            showDirectory();
+            return;
+        }
+
+        if (command.startsWith("cd ")) {
+            changeDirectory(command.substring(3));
+            return;
+        }
+
+        if (command.startsWith("open ")) {
+            openFile(command.substring(5).trim());
+            return;
+        }
+
+        if (command === "whoami") {
+            showWhoami();
+            return;
+        }
+
+        if (command === "status") {
+            showStatus();
+            return;
+        }
+
+        if (command === "clear" || command === "cls") {
+            clearTerminal();
+            return;
+        }
+
+        if (command === "help") {
+            showHelp();
+            return;
+        }
+
+        talkToEntity(command);
+        return;
+    }
 
     if (command === "help") {
         showHelp();
@@ -877,25 +1080,42 @@ RTC CLOCK FAILURE
         return;
     }
 
+    if (command === "back") {
+        printLine(`
+'BACK' IS NOT A RECOGNIZED COMMAND.
+
+HINT:
+USE CD ..
+`);
+        return;
+    }
+
     if (command.startsWith("cd ")) {
-        const target = command.substring(3);
-        changeDirectory(target);
+        changeDirectory(command.substring(3));
         return;
     }
 
     if (command.startsWith("open ")) {
-        const filename = command.substring(5).trim();
-        openFile(filename);
+        openFile(command.substring(5).trim());
         return;
     }
 
     if (command.startsWith("unlock ")) {
-        const code = command.substring(7).trim();
-        unlockArchive(code);
+        unlockArchive(command.substring(7).trim());
         return;
     }
 
-    if (hiddenCommands(command)) {
+    if (command === "ping") {
+        printLine(`
+Pinging BBX-07...
+
+Reply from BBX-07
+Reply from BBX-07
+Reply from BBX-07
+
+Reply from UNKNOWN
+`, "output warning");
+
         return;
     }
 
@@ -912,6 +1132,7 @@ commandInput.addEventListener("keydown", function(event) {
     }
 
     const value = commandInput.value;
+
     commandInput.value = "";
 
     if (!systemBooted) {
