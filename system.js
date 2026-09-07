@@ -46,7 +46,6 @@ const filesystem = {
 };
 
 const fileContents = {
-
     "diary.txt": `
 diary.txt
 RECOVERED TEXT FILE
@@ -265,13 +264,11 @@ Type HELP for available commands.
 }
 
 function runBootCommand(command) {
-
     const answer = command.trim().toLowerCase();
 
     printLine("> " + command);
 
     if (answer === "y" || answer === "yes") {
-
         commandInput.disabled = true;
 
         printLine(`
@@ -290,7 +287,6 @@ ACCESS GRANTED.
     }
 
     if (answer === "n" || answer === "no") {
-
         printLine(`
 SESSION TERMINATED.
 
@@ -306,7 +302,6 @@ REMOTE SESSION REMAINS ACTIVE.
 }
 
 function showHelp() {
-
     printLine(`
 AVAILABLE COMMANDS
 
@@ -329,8 +324,7 @@ CD ..
 }
 
 function showDirectory() {
-
-    let folder = filesystem[currentPath];
+    const folder = filesystem[currentPath];
 
     if (!folder) {
         printLine("DIRECTORY ERROR.");
@@ -355,41 +349,32 @@ DIRECTORY OF ${currentPath}
 `;
 
     list.forEach(item => {
-
         if (item.includes(".")) {
             text += "       " + item + "\n";
         } else {
             text += "<DIR>  " + item + "\n";
         }
-
     });
 
     printLine(text);
 }
 
 function changeDirectory(target) {
-
     target = target.trim().toLowerCase();
 
     if (target === "..") {
-
         if (currentPath === "C:\\RECOVERY") {
             return;
         }
 
         currentPath = "C:\\RECOVERY";
-
         updatePrompt();
-
         return;
     }
 
     if (currentPath === "C:\\RECOVERY") {
-
         if (target === "archive") {
-
             if (!archiveUnlocked) {
-
                 printLine(`
 ACCESS DENIED.
 
@@ -404,15 +389,12 @@ UNLOCK <CODE>
 
             currentPath = "C:\\RECOVERY\\archive";
             updatePrompt();
-
             return;
         }
 
         if (target === "photos") {
-
             currentPath = "C:\\RECOVERY\\photos";
             updatePrompt();
-
             return;
         }
     }
@@ -421,11 +403,9 @@ UNLOCK <CODE>
 }
 
 function openFile(filename) {
-
     filename = filename.toLowerCase();
 
     if (filename === "connection.txt" && hiddenFileVisible) {
-
         printLine(`
 connection.txt
 
@@ -440,11 +420,9 @@ HELLO.
         entityAwake = true;
 
         setTimeout(() => {
-
             printLine(`
 YOU FOUND ME.
 `, "output danger");
-
         }, 2500);
 
         return;
@@ -458,16 +436,22 @@ YOU FOUND ME.
     }
 
     if (!currentFolder.children.includes(filename)) {
-
         printLine("FILE NOT FOUND.");
+        return;
+    }
 
+    if (filename === "photos" || filename === "archive") {
+        printLine(`
+${filename.toUpperCase()} IS A DIRECTORY.
+
+USE:
+CD ${filename}
+`);
         return;
     }
 
     if (!fileContents[filename]) {
-
         printLine("UNABLE TO OPEN FILE.");
-
         return;
     }
 
@@ -479,14 +463,11 @@ YOU FOUND ME.
 }
 
 function progressionCheck(filename) {
-
     if (
         filename === "frame_0317.img" &&
         !hiddenFileVisible
     ) {
-
         setTimeout(() => {
-
             printLine(`
 SYSTEM EVENT DETECTED.
 
@@ -494,43 +475,38 @@ DIRECTORY CONTENTS CHANGED.
 `, "output warning");
 
             hiddenFileVisible = true;
-
         }, 2000);
     }
 
     if (filesOpened >= 5 && !hiddenFileVisible) {
-
         hiddenFileVisible = true;
 
         setTimeout(() => {
-
             printLine(`
 WARNING:
 
 UNAUTHORIZED FILE CREATED.
 `, "output warning");
-
         }, 1500);
     }
 }
 
 function unlockArchive(code) {
-
     if (archiveUnlocked) {
-
         printLine("ARCHIVE ALREADY UNLOCKED.");
-
         return;
     }
 
     if (code === "0317") {
-
         archiveUnlocked = true;
 
         printLine(`
 AUTHORIZATION ACCEPTED.
 
 ARCHIVE DECRYPTED.
+
+USE:
+CD archive
 `);
 
         return;
@@ -542,9 +518,7 @@ AUTHORIZATION FAILED.
 }
 
 function showWhoami() {
-
     if (!entityAwake) {
-
         printLine(`
 USER: UNKNOWN
 AUTHORIZATION: NONE
@@ -562,9 +536,7 @@ SESSION ORIGIN: CURRENT
 }
 
 function showStatus() {
-
     if (!entityAwake) {
-
         printLine(`
 NODE: BBX-07
 CONNECTION: ACTIVE
@@ -586,16 +558,13 @@ SECOND CONNECTION: ACTIVE
 }
 
 function clearTerminal() {
-
     const outputs = terminal.querySelectorAll(".output");
 
     outputs.forEach(output => output.remove());
 }
 
 function hiddenCommands(command) {
-
     if (command === "ping") {
-
         printLine(`
 Pinging BBX-07...
 
@@ -610,9 +579,7 @@ Reply from UNKNOWN
     }
 
     if (command === "disconnect") {
-
         if (!entityAwake) {
-
             printLine(`
 DISCONNECTING...
 
@@ -625,30 +592,22 @@ REMOTE SESSION LOCKED.
         }
 
         startEnding();
-
         return true;
     }
 
     if (command === "hello") {
-
         if (entityAwake) {
-
             printLine(`
 HELLO.
 `, "output danger");
 
             setTimeout(() => {
-
                 printLine(`
 I HAVE BEEN WAITING.
 `, "output danger");
-
             }, 1500);
-
         } else {
-
             printLine("NO RESPONSE.");
-
         }
 
         return true;
@@ -658,7 +617,6 @@ I HAVE BEEN WAITING.
 }
 
 function startEnding() {
-
     if (endingStarted) {
         return;
     }
@@ -674,39 +632,30 @@ TERMINATING SESSION...
 `);
 
     setTimeout(() => {
-
         printLine(`
 FAILED.
 `, "output danger");
-
     }, 1500);
 
     setTimeout(() => {
-
         printLine(`
 YOU ARE NOT CONNECTED TO BBX-07.
 `, "output danger");
-
     }, 3200);
 
     setTimeout(() => {
-
         printLine(`
 BBX-07 IS CONNECTED TO YOU.
 `, "output danger glitch");
-
     }, 5000);
 
     setTimeout(() => {
-
         printLine(`
 TRANSFER.........................COMPLETE
 `, "output danger");
-
     }, 7000);
 
     setTimeout(() => {
-
         clearTerminal();
 
         printLine(`
@@ -718,20 +667,16 @@ LAST CONNECTION:
 
 TODAY
 `, "output danger");
-
     }, 9000);
 
     setTimeout(() => {
-
         printLine(`
 Thank you for reconnecting BBX-07.
 `, "output danger");
-
     }, 11500);
 }
 
 function runCommand(command) {
-
     const originalCommand = command;
 
     command = command.trim().toLowerCase();
@@ -743,31 +688,26 @@ function runCommand(command) {
     }
 
     if (command === "help") {
-
         showHelp();
         return;
     }
 
     if (command === "dir" || command === "ls") {
-
         showDirectory();
         return;
     }
 
     if (command === "whoami") {
-
         showWhoami();
         return;
     }
 
     if (command === "status") {
-
         showStatus();
         return;
     }
 
     if (command === "date") {
-
         printLine(`
 SYSTEM DATE:
 
@@ -784,35 +724,28 @@ RTC CLOCK FAILURE
         command === "clear" ||
         command === "cls"
     ) {
-
         clearTerminal();
         return;
     }
 
     if (command.startsWith("cd ")) {
-
         const target = command.substring(3);
 
         changeDirectory(target);
-
         return;
     }
 
     if (command.startsWith("open ")) {
-
         const filename = command.substring(5).trim();
 
         openFile(filename);
-
         return;
     }
 
     if (command.startsWith("unlock ")) {
-
         const code = command.substring(7).trim();
 
         unlockArchive(code);
-
         return;
     }
 
@@ -828,7 +761,6 @@ RTC CLOCK FAILURE
 }
 
 commandInput.addEventListener("keydown", function(event) {
-
     if (event.key !== "Enter") {
         return;
     }
@@ -838,24 +770,18 @@ commandInput.addEventListener("keydown", function(event) {
     commandInput.value = "";
 
     if (!systemBooted) {
-
         runBootCommand(value);
-
     } else {
-
         runCommand(value);
-
     }
 
     scrollBottom();
 });
 
 document.addEventListener("click", function() {
-
     if (!commandInput.disabled) {
         commandInput.focus();
     }
-
 });
 
 commandInput.focus();
