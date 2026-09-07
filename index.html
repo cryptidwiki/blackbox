@@ -11,19 +11,33 @@
 
 <body>
 
-    <h1>BLACKBOX SYSTEMS</h1>
+<div id="terminal">
 
-    <p>REMOTE RECOVERY INTERFACE</p>
+    <div class="output">
+BLACKBOX SYSTEMS
+REMOTE RECOVERY INTERFACE
 
-    <br>
+NODE: BBX-07
+STATUS: DEGRADED
+LAST CONNECTION: 10/31/1996 03:17:42
 
-    <p>NODE: BBX-07</p>
-    <p>STATUS: DEGRADED</p>
-    <p>LAST CONNECTION: 10/31/1996 03:17:42</p>
+Type HELP for available commands.
+    </div>
 
-    <br>
+    <div id="input-line">
+        <span>C:\RECOVERY&gt;</span>
+        <input
+            id="command-input"
+            type="text"
+            autocomplete="off"
+            autofocus
+            spellcheck="false"
+        >
+    </div>
 
-    <p>C:\RECOVERY&gt; <span class="cursor"></span></p>
+</div>
+
+<script src="system.js"></script>
 
 </body>
 </html>
