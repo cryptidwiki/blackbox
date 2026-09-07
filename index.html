@@ -6,26 +6,28 @@
 
     <title>BLACKBOX</title>
 
-    <link rel="stylesheet" href="terminal.css">
+    <link rel="stylesheet" href="terminal.css?v=3">
 </head>
 
 <body>
 
 <div id="terminal">
 
-    <div class="output">
-BLACKBOX SYSTEMS
-REMOTE RECOVERY INTERFACE
+    <div id="boot-screen" class="output">
+INITIALIZING RECOVERY ENVIRONMENT...
 
-NODE: BBX-07
-STATUS: DEGRADED
-LAST CONNECTION: 10/31/1996 03:17:42
+MEMORY CHECK..............OK
+NETWORK INTERFACE.........FAILED
+RECOVERY VOLUME...........MOUNTED
+REMOTE SESSION............DETECTED
 
-Type HELP for available commands.
+WARNING: NODE BBX-07 LAST RESPONDED 10/31/1996
+
+CONTINUE? Y/N
     </div>
 
     <div id="input-line">
-        <span>C:\RECOVERY&gt;</span>
+        <span id="prompt">&gt;</span>
         <input
             id="command-input"
             type="text"
@@ -37,7 +39,7 @@ Type HELP for available commands.
 
 </div>
 
-<script src="system.js"></script>
+<script src="system.js?v=3"></script>
 
 </body>
 </html>
