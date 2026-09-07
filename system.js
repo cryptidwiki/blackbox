@@ -4,7 +4,6 @@ const prompt = document.getElementById("prompt");
 const bootScreen = document.getElementById("boot-screen");
 
 let systemBooted = false;
-
 let currentPath = "C:\\RECOVERY";
 
 let archiveUnlocked = false;
@@ -13,6 +12,8 @@ let entityAwake = false;
 let endingStarted = false;
 
 let filesOpened = 0;
+let commandsEntered = 0;
+let creepyStage = 0;
 
 const filesystem = {
     "C:\\RECOVERY": {
@@ -176,6 +177,8 @@ Empty hallway.
 Emergency lighting active.
 
 No personnel detected.
+
+Frame corruption detected near CAMERA 04.
 `,
 
     "serverroom.img": `
@@ -196,6 +199,10 @@ Camera artifact detected near rear wall.
 
 ERROR:
 UNABLE TO CLASSIFY OBJECT.
+
+Second pass result:
+
+OBJECT LOCATION CHANGED.
 `,
 
     "frame_0317.img": `
@@ -213,12 +220,15 @@ Terminal active.
 Screen text recovered:
 
 "WAITING FOR CONNECTION"
+
+Additional text detected behind primary image layer:
+
+"NOT DANIEL"
 `
 };
 
 function printLine(text, className = "output") {
     const output = document.createElement("div");
-
     output.className = className;
     output.textContent = text;
 
@@ -259,7 +269,6 @@ Type HELP for available commands.
 
     currentPath = "C:\\RECOVERY";
     updatePrompt();
-
     systemBooted = true;
 }
 
@@ -295,6 +304,12 @@ ERROR: DISCONNECT FAILED.
 REMOTE SESSION REMAINS ACTIVE.
 `, "output danger");
 
+        setTimeout(() => {
+            printLine(`
+CONNECTION ORIGIN RETAINED.
+`, "output danger");
+        }, 1800);
+
         return;
     }
 
@@ -306,19 +321,22 @@ function showHelp() {
 AVAILABLE COMMANDS
 
 HELP          Display available commands
-DIR           List directory contents
-CD            Change directory
-OPEN          Open file
+DIR           List files and directories
+CD <folder>   Enter a directory
+CD ..         Return to previous directory
+CD \\          Return to recovery root
+OPEN <file>   Open a file
 WHOAMI        Display current user
 STATUS        Display system status
 DATE          Display system date
 CLS           Clear terminal
 CLEAR         Clear terminal
 
-Examples:
+EXAMPLES:
 
-OPEN diary.txt
-CD archive
+DIR
+CD photos
+OPEN hallway.img
 CD ..
 `);
 }
@@ -364,9 +382,16 @@ function changeDirectory(target) {
 
     if (target === "..") {
         if (currentPath === "C:\\RECOVERY") {
+            printLine("ALREADY AT RECOVERY ROOT.");
             return;
         }
 
+        currentPath = "C:\\RECOVERY";
+        updatePrompt();
+        return;
+    }
+
+    if (target === "\\" || target === "/") {
         currentPath = "C:\\RECOVERY";
         updatePrompt();
         return;
@@ -395,6 +420,20 @@ UNLOCK <CODE>
         if (target === "photos") {
             currentPath = "C:\\RECOVERY\\photos";
             updatePrompt();
+
+            if (creepyStage < 1) {
+                creepyStage = 1;
+
+                setTimeout(() => {
+                    printLine(`
+CAMERA DIRECTORY ACCESSED.
+
+NOTE:
+IMAGE INDEX WAS MODIFIED AFTER SYSTEM SHUTDOWN.
+`, "output warning");
+                }, 900);
+            }
+
             return;
         }
     }
@@ -409,10 +448,13 @@ function openFile(filename) {
         printLine(`
 connection.txt
 
-THIS FILE WAS CREATED:
+FILE CREATED:
+CURRENT SESSION
 
-NOW
+OWNER:
+UNKNOWN
 
+CONTENTS:
 
 HELLO.
 `, "output danger");
@@ -421,9 +463,15 @@ HELLO.
 
         setTimeout(() => {
             printLine(`
-YOU FOUND ME.
+YOU TOOK LONGER THAN DANIEL.
 `, "output danger");
-        }, 2500);
+        }, 2200);
+
+        setTimeout(() => {
+            printLine(`
+BUT YOU FOUND ME.
+`, "output danger");
+        }, 4200);
 
         return;
     }
@@ -456,13 +504,24 @@ CD ${filename}
     }
 
     printLine(fileContents[filename]);
-
     filesOpened++;
 
     progressionCheck(filename);
 }
 
 function progressionCheck(filename) {
+    if (filename === "serverroom.img" && creepyStage < 2) {
+        creepyStage = 2;
+
+        setTimeout(() => {
+            printLine(`
+WARNING:
+
+FRAME HASH DOES NOT MATCH ARCHIVED COPY.
+`, "output warning");
+        }, 1400);
+    }
+
     if (
         filename === "frame_0317.img" &&
         !hiddenFileVisible
@@ -475,7 +534,7 @@ DIRECTORY CONTENTS CHANGED.
 `, "output warning");
 
             hiddenFileVisible = true;
-        }, 2000);
+        }, 1800);
     }
 
     if (filesOpened >= 5 && !hiddenFileVisible) {
@@ -485,9 +544,9 @@ DIRECTORY CONTENTS CHANGED.
             printLine(`
 WARNING:
 
-UNAUTHORIZED FILE CREATED.
+UNAUTHORIZED FILE CREATED IN C:\\RECOVERY
 `, "output warning");
-        }, 1500);
+        }, 1200);
     }
 }
 
@@ -508,6 +567,18 @@ ARCHIVE DECRYPTED.
 USE:
 CD archive
 `);
+
+        setTimeout(() => {
+            printLine(`
+WARNING:
+
+ARCHIVE LAST ACCESSED:
+03:17:42
+
+USER:
+UNKNOWN
+`, "output warning");
+        }, 1600);
 
         return;
     }
@@ -532,6 +603,7 @@ SESSION ORIGIN: UNRESOLVED
 USER: OBSERVED
 AUTHORIZATION: IRRELEVANT
 SESSION ORIGIN: CURRENT
+SESSION STATUS: RETAINED
 `, "output danger");
 }
 
@@ -554,16 +626,33 @@ SYSTEM INTEGRITY: UNKNOWN
 RECOVERY MODE: DISABLED
 
 SECOND CONNECTION: ACTIVE
+SECOND CONNECTION ORIGIN: LOCAL
 `, "output danger");
 }
 
 function clearTerminal() {
     const outputs = terminal.querySelectorAll(".output");
-
     outputs.forEach(output => output.remove());
 }
 
 function hiddenCommands(command) {
+    if (command === "back") {
+        printLine(`
+'BACK' IS NOT A RECOGNIZED COMMAND.
+
+HINT:
+USE CD ..
+`);
+
+        return true;
+    }
+
+    if (command === "home") {
+        currentPath = "C:\\RECOVERY";
+        updatePrompt();
+        return true;
+    }
+
     if (command === "ping") {
         printLine(`
 Pinging BBX-07...
@@ -574,6 +663,14 @@ Reply from BBX-07
 
 Reply from UNKNOWN
 `, "output warning");
+
+        if (entityAwake) {
+            setTimeout(() => {
+                printLine(`
+Reply from YOUR TERMINAL
+`, "output danger");
+            }, 1500);
+        }
 
         return true;
     }
@@ -605,7 +702,7 @@ HELLO.
                 printLine(`
 I HAVE BEEN WAITING.
 `, "output danger");
-            }, 1500);
+            }, 1400);
         } else {
             printLine("NO RESPONSE.");
         }
@@ -616,13 +713,52 @@ I HAVE BEEN WAITING.
     return false;
 }
 
+function randomCreepyEvent() {
+    if (!systemBooted || endingStarted) {
+        return;
+    }
+
+    if (commandsEntered === 6 && creepyStage < 3) {
+        creepyStage = 3;
+
+        setTimeout(() => {
+            printLine(`
+BACKGROUND PROCESS STARTED:
+
+observer.exe
+`, "output warning");
+        }, 900);
+    }
+
+    if (commandsEntered === 10 && !entityAwake) {
+        setTimeout(() => {
+            printLine(`
+SYSTEM NOTICE:
+
+KEYBOARD INPUT BUFFER ACCESSED BY UNKNOWN PROCESS.
+`, "output warning");
+        }, 1000);
+    }
+
+    if (commandsEntered === 14 && !entityAwake) {
+        setTimeout(() => {
+            printLine(`
+03:17:42
+
+03:17:42
+
+03:17:42
+`, "output danger");
+        }, 900);
+    }
+}
+
 function startEnding() {
     if (endingStarted) {
         return;
     }
 
     endingStarted = true;
-
     commandInput.disabled = true;
 
     printLine(`
@@ -635,25 +771,31 @@ TERMINATING SESSION...
         printLine(`
 FAILED.
 `, "output danger");
-    }, 1500);
+    }, 1400);
 
     setTimeout(() => {
         printLine(`
 YOU ARE NOT CONNECTED TO BBX-07.
 `, "output danger");
-    }, 3200);
+    }, 3000);
 
     setTimeout(() => {
         printLine(`
 BBX-07 IS CONNECTED TO YOU.
 `, "output danger glitch");
-    }, 5000);
+    }, 4700);
 
     setTimeout(() => {
         printLine(`
-TRANSFER.........................COMPLETE
+TRANSFERRING SESSION STATE................COMPLETE
 `, "output danger");
-    }, 7000);
+    }, 6500);
+
+    setTimeout(() => {
+        printLine(`
+CLOSING REMOTE INTERFACE................FAILED
+`, "output danger");
+    }, 8000);
 
     setTimeout(() => {
         clearTerminal();
@@ -667,18 +809,25 @@ LAST CONNECTION:
 
 TODAY
 `, "output danger");
-    }, 9000);
+    }, 9600);
 
     setTimeout(() => {
         printLine(`
-Thank you for reconnecting BBX-07.
+NEW NODE REGISTERED.
 `, "output danger");
-    }, 11500);
+    }, 11400);
+
+    setTimeout(() => {
+        printLine(`
+NODE NAME:
+
+YOU
+`, "output danger glitch");
+    }, 13000);
 }
 
 function runCommand(command) {
     const originalCommand = command;
-
     command = command.trim().toLowerCase();
 
     printLine(currentPath + "> " + originalCommand);
@@ -686,6 +835,9 @@ function runCommand(command) {
     if (command === "") {
         return;
     }
+
+    commandsEntered++;
+    randomCreepyEvent();
 
     if (command === "help") {
         showHelp();
@@ -720,31 +872,25 @@ RTC CLOCK FAILURE
         return;
     }
 
-    if (
-        command === "clear" ||
-        command === "cls"
-    ) {
+    if (command === "clear" || command === "cls") {
         clearTerminal();
         return;
     }
 
     if (command.startsWith("cd ")) {
         const target = command.substring(3);
-
         changeDirectory(target);
         return;
     }
 
     if (command.startsWith("open ")) {
         const filename = command.substring(5).trim();
-
         openFile(filename);
         return;
     }
 
     if (command.startsWith("unlock ")) {
         const code = command.substring(7).trim();
-
         unlockArchive(code);
         return;
     }
@@ -766,7 +912,6 @@ commandInput.addEventListener("keydown", function(event) {
     }
 
     const value = commandInput.value;
-
     commandInput.value = "";
 
     if (!systemBooted) {
