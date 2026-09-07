@@ -1,5 +1,9 @@
 const terminal = document.getElementById("terminal");
 const commandInput = document.getElementById("command-input");
+const prompt = document.getElementById("prompt");
+const bootScreen = document.getElementById("boot-screen");
+
+let systemBooted = false;
 
 const commands = {
     help: `
@@ -43,7 +47,59 @@ function printLine(text) {
     const output = document.createElement("div");
     output.className = "output";
     output.textContent = text;
-    terminal.insertBefore(output, document.getElementById("input-line"));
+
+    terminal.insertBefore(
+        output,
+        document.getElementById("input-line")
+    );
+}
+
+function loadRecoveryTerminal() {
+    bootScreen.remove();
+
+    printLine(`
+BLACKBOX SYSTEMS
+REMOTE RECOVERY INTERFACE
+
+NODE: BBX-07
+STATUS: DEGRADED
+LAST CONNECTION: 10/31/1996 03:17:42
+
+Type HELP for available commands.
+`);
+
+    prompt.textContent = "C:\\RECOVERY>";
+    systemBooted = true;
+}
+
+function runBootCommand(command) {
+    const answer = command.trim().toLowerCase();
+
+    printLine("> " + command);
+
+    if (answer === "y" || answer === "yes") {
+        printLine(`
+LOADING RECOVERY ENVIRONMENT...
+
+ACCESS GRANTED.
+`);
+
+        setTimeout(loadRecoveryTerminal, 800);
+        return;
+    }
+
+    if (answer === "n" || answer === "no") {
+        printLine(`
+SESSION TERMINATED.
+
+ERROR: DISCONNECT FAILED.
+
+REMOTE SESSION REMAINS ACTIVE.
+`);
+        return;
+    }
+
+    printLine("INVALID RESPONSE. ENTER Y OR N.");
 }
 
 function runCommand(command) {
@@ -102,20 +158,29 @@ WARNING: EVENT SEQUENCE INVALID
     }
 
     printLine(
-        "'" + originalCommand + "' is not recognized as an internal or external command."
+        "'" + originalCommand +
+        "' is not recognized as an internal or external command."
     );
 }
 
 commandInput.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        runCommand(commandInput.value);
-        commandInput.value = "";
-
-        window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth"
-        });
+    if (event.key !== "Enter") {
+        return;
     }
+
+    const value = commandInput.value;
+    commandInput.value = "";
+
+    if (!systemBooted) {
+        runBootCommand(value);
+    } else {
+        runCommand(value);
+    }
+
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+    });
 });
 
 document.addEventListener("click", function() {
